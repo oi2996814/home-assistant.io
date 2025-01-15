@@ -2,15 +2,15 @@
 title: RDW
 description: Instructions on how to integrate RDW vehicle information with Home Assistant.
 ha_category:
-  - Binary Sensor
+  - Binary sensor
   - Car
   - Sensor
 ha_release: 2021.12
 ha_iot_class: Cloud Polling
 ha_config_flow: true
-ha_quality_scale: platinum
 ha_codeowners:
   - '@frenck'
+  - '@joostlek'
 ha_domain: rdw
 ha_platforms:
   - binary_sensor

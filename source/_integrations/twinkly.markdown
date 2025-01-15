@@ -10,13 +10,17 @@ ha_iot_class: Local Polling
 ha_codeowners:
   - '@dr1rrb'
   - '@Robbie1221'
+  - '@Olen'
 ha_platforms:
+  - diagnostics
   - light
 ha_dhcp: true
 ha_integration_type: integration
 ---
 
 The Twinkly integration allows you to control [Twinkly](https://twinkly.com/) LED string from Home Assistant.
+
+You may need to program at least one [effect](#effects) into your device before you can control it at all using this integration.
 
 ## Effects
 

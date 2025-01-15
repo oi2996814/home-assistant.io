@@ -1,16 +1,19 @@
 ---
-title: "MQTT Alarm Control Panel"
-description: "Instructions on how to integrate MQTT capable Alarm Panels into Home Assistant."
+title: "MQTT Alarm control panel"
+description: "Instructions on how to integrate MQTT capable alarm panels into Home Assistant."
 ha_category:
   - Alarm
 ha_release: 0.7.4
 ha_iot_class: Configurable
 ha_domain: mqtt
+related:
+  - docs: /docs/configuration/
+    title: Configuration file
 ---
 
-The `mqtt` alarm panel platform enables the possibility to control MQTT capable alarm panels. The Alarm icon will change state after receiving a new state from `state_topic`. If these messages are published with *RETAIN* flag, the MQTT alarm panel will receive an instant state update after subscription and will start with the correct state. Otherwise, the initial state will be `unknown`.
+The `mqtt` alarm panel {% term integration %} enables the possibility to control MQTT capable alarm panels. The Alarm icon will change state after receiving a new state from `state_topic`. If these messages are published with *RETAIN* flag, the MQTT alarm panel will receive an instant state update after subscription and will start with the correct state. Otherwise, the initial state will be `unknown`.
 
-The integration will accept the following states from your Alarm Panel (in lower case):
+The {% term integration %} will accept the following states from your Alarm Panel (in lower case):
 
 - `disarmed`
 - `armed_home`
@@ -23,19 +26,18 @@ The integration will accept the following states from your Alarm Panel (in lower
 - `arming`
 - `disarming`
 
-The integration can control your Alarm Panel by publishing to the `command_topic` when a user interacts with the Home Assistant frontend.
+The {% term integration %} can control your Alarm Panel by publishing to the `command_topic` when a user interacts with the Home Assistant frontend.
 
 ## Configuration
 
-<a id='new_format'></a>
-
-To enable this platform, add the following lines to your `configuration.yaml`:
+To enable this {% term integration %}, add the following lines to your {% term "`configuration.yaml`" %} file.
+{% include integrations/restart_ha_after_config_inclusion.md %}
 
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  alarm_control_panel:
-    - state_topic: "home/alarm"
+  - alarm_control_panel:
+      state_topic: "home/alarm"
       command_topic: "home/alarm/set"
 ```
 
@@ -110,7 +112,7 @@ device:
   type: map
   keys:
     configuration_url:
-      description: 'A link to the webpage that can manage the configuration of this device. Can be either an HTTP or HTTPS link.'
+      description: 'A link to the webpage that can manage the configuration of this device. Can be either an `http://`, `https://` or an internal `homeassistant://` URL.'
       required: false
       type: string
     connections:
@@ -133,8 +135,16 @@ device:
       description: "The model of the device."
       required: false
       type: string
+    model_id:
+      description: The model identifier of the device.
+      required: false
+      type: string
     name:
       description: "The name of the device."
+      required: false
+      type: string
+    serial_number:
+      description: "The serial number of the device."
       required: false
       type: string
     suggested_area:
@@ -163,7 +173,10 @@ entity_category:
   description: The [category](https://developers.home-assistant.io/docs/core/entity#generic-properties) of the entity.
   required: false
   type: string
-  default: None
+entity_picture:
+  description: "Picture URL for the entity."
+  required: false
+  type: string
 icon:
   description: "[Icon](/docs/configuration/customizing-devices/#icon) for the entity."
   required: false
@@ -177,7 +190,7 @@ json_attributes_topic:
   required: false
   type: string
 name:
-  description: The name of the alarm.
+  description: The name of the alarm. Can be set to `null` if only the device name is relevant.
   required: false
   type: string
   default: MQTT Alarm
@@ -230,8 +243,12 @@ payload_trigger:
   required: false
   type: string
   default: TRIGGER
+platform:
+  description: Must be `alarm_control_panel`. Only allowed and required in [MQTT auto discovery device messages](/integrations/mqtt/#device-discovery-payload).
+  required: true
+  type: string
 qos:
-  description: The maximum QoS level of the state topic.
+  description: The maximum QoS level to be used when receiving and publishing messages.
   required: false
   type: integer
   default: 0
@@ -241,11 +258,16 @@ retain:
   type: boolean
   default: false
 state_topic:
-  description: The MQTT topic subscribed to receive state updates.
+  description: "The MQTT topic subscribed to receive state updates. A \"None\" payload resets to an `unknown` state. An empty payload is ignored. Valid state payloads are: `armed_away`, `armed_custom_bypass`, `armed_home`, `armed_night`, `armed_vacation`, `arming`, `disarmed`, `disarming` `pending` and `triggered`."
   required: true
   type: string
+supported_features:
+  description: A list of features that the alarm control panel supports. The available list options are `arm_home`, `arm_away`, `arm_night`, `arm_vacation`, `arm_custom_bypass`, and `trigger`.
+  required: false
+  type: list
+  default: ["arm_home", "arm_away", "arm_night", "arm_vacation", "arm_custom_bypass", "trigger"]
 unique_id:
-   description: An ID that uniquely identifies this alarm panel. If two alarm panels have the same unique ID, Home Assistant will raise an exception.
+   description: An ID that uniquely identifies this alarm panel. If two alarm panels have the same unique ID, Home Assistant will raise an exception. Required when used with device-based discovery.
    required: false
    type: string
 value_template:
@@ -258,6 +280,26 @@ value_template:
 
 In this section you find some real-life examples of how to use this alarm control panel.
 
+### Configuration with partial feature support
+
+The example below shows a full configuration with an alarm panel that only supports the `arm_home` and `arm_away` features.
+
+{% raw %}
+
+```yaml
+# Example with partial feature support
+mqtt:
+  - alarm_control_panel:
+      name: "Alarm Panel"
+      supported_features:
+        - arm_home
+        - arm_away
+      state_topic: "alarmdecoder/panel"
+      command_topic: "alarmdecoder/panel/set"
+```
+
+{% endraw %}
+
 ### Configuration with local code validation
 
 The example below shows a full configuration with local code validation.
@@ -267,8 +309,8 @@ The example below shows a full configuration with local code validation.
 ```yaml
 # Example using text based code with local validation configuration.yaml
 mqtt:
-  alarm_control_panel:
-    - name: "Alarm Panel With Numeric Keypad"
+  - alarm_control_panel:
+      name: "Alarm Panel With Numeric Keypad"
       state_topic: "alarmdecoder/panel"
       value_template: "{{value_json.state}}"
       command_topic: "alarmdecoder/panel/set"
@@ -286,8 +328,8 @@ The example below shows a full configuration with remote code validation and `co
 ```yaml
 # Example using text code with remote validation configuration.yaml
 mqtt:
-  alarm_control_panel:
-    - name: "Alarm Panel With Text Code Dialog"
+  - alarm_control_panel:
+      name: "Alarm Panel With Text Code Dialog"
       state_topic: "alarmdecoder/panel"
       value_template: "{{ value_json.state }}"
       command_topic: "alarmdecoder/panel/set"
@@ -299,8 +341,8 @@ mqtt:
 ```yaml
 # Example using numeric code with remote validation configuration.yaml
 mqtt:
-  alarm_control_panel:
-    - name: "Alarm Panel With Numeric Keypad"
+  - alarm_control_panel:
+      name: "Alarm Panel With Numeric Keypad"
       state_topic: "alarmdecoder/panel"
       value_template: "{{ value_json.state }}"
       command_topic: "alarmdecoder/panel/set"
@@ -311,8 +353,7 @@ mqtt:
 
 {% endraw %}
 
-<div class='note warning'>
-
+{% caution %}
 When your MQTT connection is not secured, this will send your secret code over the network unprotected!
-
-</div>
+{% endcaution %}
+ 

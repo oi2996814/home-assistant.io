@@ -18,15 +18,14 @@ When a `state_topic` is not available, the fan will work in optimistic mode. In 
 
 Optimistic mode can be forced even if a `state_topic` is available. Try to enable it if you are experiencing incorrect fan operation.
 
-<a id='new_format'></a>
-
-To enable MQTT fans in your installation, add the following to your `configuration.yaml` file:
+To enable MQTT fans in your installation, add the following to your {% term "`configuration.yaml`" %} file.
+{% include integrations/restart_ha_after_config_inclusion.md %}
 
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  fan:
-    - command_topic: "bedroom_fan/on/set"
+  - fan:
+      command_topic: "bedroom_fan/on/set"
 ```
 
 {% configuration %}
@@ -80,13 +79,13 @@ device:
   type: map
   keys:
     configuration_url:
-      description: 'A link to the webpage that can manage the configuration of this device. Can be either an HTTP or HTTPS link.'
+      description: 'A link to the webpage that can manage the configuration of this device. Can be either an `http://`, `https://` or an internal `homeassistant://` URL.'
       required: false
       type: string
     connections:
       description: 'A list of connections of the device to the outside world as a list of tuples `[connection_type, connection_identifier]`. For example the MAC address of a network interface: `"connections": [["mac", "02:5b:26:a8:dc:12"]]`.'
       required: false
-      type: [list, map]
+      type: list
     hw_version:
       description: The hardware version of the device.
       required: false
@@ -103,8 +102,16 @@ device:
       description: The model of the device.
       required: false
       type: string
+    model_id:
+      description: The model identifier of the device.
+      required: false
+      type: string
     name:
       description: The name of the device.
+      required: false
+      type: string
+    serial_number:
+      description: "The serial number of the device."
       required: false
       type: string
     suggested_area:
@@ -133,7 +140,10 @@ entity_category:
   description: The [category](https://developers.home-assistant.io/docs/core/entity#generic-properties) of the entity.
   required: false
   type: string
-  default: None
+entity_picture:
+  description: "Picture URL for the entity."
+  required: false
+  type: string
 icon:
   description: "[Icon](/docs/configuration/customizing-devices/#icon) for the entity."
   required: false
@@ -147,7 +157,7 @@ json_attributes_topic:
   required: false
   type: string
 name:
-  description: The name of the fan.
+  description: The name of the fan. Can be set to `null` if only the device name is relevant.
   required: false
   type: string
   default: MQTT Fan
@@ -223,15 +233,15 @@ payload_oscillation_on:
   type: string
   default: oscillate_on
 payload_reset_percentage:
-  description: A special payload that resets the `percentage` state attribute to `None` when received at the `percentage_state_topic`.
+  description: A special payload that resets the `percentage` state attribute to `unknown` when received at the `percentage_state_topic`.
   required: false
   type: string
-  default: 'None'
+  default: '"None"'
 payload_reset_preset_mode:
-  description: A special payload that resets the `preset_mode` state attribute to `None` when received at the `preset_mode_state_topic`.
+  description: A special payload that resets the `preset_mode` state attribute to `unknown` when received at the `preset_mode_state_topic`.
   required: false
   type: string
-  default: 'None'
+  default: '"None"'
 percentage_command_template:
   description: Defines a [template](/docs/configuration/templating/#using-templates-with-the-mqtt-integration) to generate the payload to send to `percentage_command_topic`.
   required: false
@@ -248,6 +258,10 @@ percentage_value_template:
   description: Defines a [template](/docs/configuration/templating/#using-templates-with-the-mqtt-integration) to extract the `percentage` value from the payload received on `percentage_state_topic`.
   required: false
   type: template
+platform:
+  description: Must be `fan`. Only allowed and required in [MQTT auto discovery device messages](/integrations/mqtt/#device-discovery-payload).
+  required: true
+  type: string
 preset_mode_command_template:
   description: Defines a [template](/docs/configuration/templating/#using-templates-with-the-mqtt-integration) to generate the payload to send to `preset_mode_command_topic`.
   required: false
@@ -270,7 +284,7 @@ preset_modes:
   type: [list]
   default: []
 qos:
-  description: The maximum QoS level of the state topic.
+  description: The maximum QoS level to be used when receiving and publishing messages.
   required: false
   type: integer
   default: 0
@@ -290,7 +304,7 @@ speed_range_min:
   type: integer
   default: 1
 state_topic:
-  description: The MQTT topic subscribed to receive state updates.
+  description: The MQTT topic subscribed to receive state updates. A "None" payload resets to an `unknown` state. An empty payload is ignored. By default, valid state payloads are `OFF` and `ON`. The accepted payloads can be overridden with the `payload_off` and `payload_on` config options.
   required: false
   type: string
 state_value_template:
@@ -298,16 +312,16 @@ state_value_template:
   required: false
   type: template
 unique_id:
-  description: An ID that uniquely identifies this fan. If two fans have the same unique ID, Home Assistant will raise an exception.
+  description: An ID that uniquely identifies this fan. If two fans have the same unique ID, Home Assistant will raise an exception. Required when used with device-based discovery.
   required: false
   type: string
 {% endconfiguration %}
 
-<div class='note warning'>
+{% important %}
 
 Make sure that your topics match exactly. `some-topic/` and `some-topic` are different topics.
 
-</div>
+{% endimportant %}
 
 ## Examples
 
@@ -321,13 +335,12 @@ There are 10 speeds within the speed range, so  `percentage_step` = 100 / 10 ste
 ```yaml
 # Example using percentage based speeds with preset modes configuration.yaml
 mqtt:
-  fan:
-    - name: "Bedroom Fan"
+  - fan:
+      name: "Bedroom Fan"
       state_topic: "bedroom_fan/on/state"
       command_topic: "bedroom_fan/on/set"
       direction_state_topic: "bedroom_fan/direction/state"
       direction_command_topic: "bedroom_fan/direction/set"
-      oscillation_command_topic: "bedroom_fan/oscillation/set"
       oscillation_state_topic: "bedroom_fan/oscillation/state"
       oscillation_command_topic: "bedroom_fan/oscillation/set"
       percentage_state_topic: "bedroom_fan/speed/percentage_state"
@@ -358,8 +371,8 @@ This example demonstrates how to use command templates with JSON output.
 ```yaml
 # Example configuration.yaml with command templates
 mqtt:
-  fan:
-    - name: "Bedroom Fan"
+  - fan:
+      name: "Bedroom Fan"
       command_topic: "bedroom_fan/on/set"
       command_template: "{ state: '{{ value }}'}"
       direction_command_template: "{{ iif(value == 'forward', 'fwd', 'rev') }}"
@@ -387,8 +400,8 @@ This example shows how to configure a fan that doesn't use `forward` and `backwa
 ```yaml
 # Example configuration.yaml with direction templates
 mqtt:
-  fan:
-    - name: "Bedroom Fan"
+  - fan:
+      name: "Bedroom Fan"
       direction_command_template: "{{ iif(value == 'forward', 'fwd', 'rev') }}"
       direction_value_template: "{{ iif(value == 'fwd', 'forward', 'reverse') }}"
 ```

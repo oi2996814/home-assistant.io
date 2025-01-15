@@ -27,6 +27,8 @@ Add Sensor:
   description: Track an additional sensor.
 Remove Sensor:
   description: Untrack a sensor.
+Settings:
+  description: Configure additional settings (e.g., show/hide sensor icons on the map).
 {% endconfiguration_basic %}
 
 ## Creating an API key
@@ -35,11 +37,11 @@ To add this integration, you need a (free) Purple Air API Key. A new account cur
 
 Detailed instructions can be found [here](https://community.purpleair.com/t/creating-api-keys/3951) but in summary you:
 
-* Create an account at https://develop.purpleair.com/ (which uses Single Sign-On through a Google account).
-* On the ['keys'](https://develop.purpleair.com/keys) page press the "plus" button to create an API key.  Leave the defaults of **Read** and **Enabled**.
-* Go to the ['projects'](https://develop.purpleair.com/projects) page and select the edit (pencil) button on the listed Project.  Add points (for example 1,000,000), then select **Update**.
-* Go back to the ['keys'](https://develop.purpleair.com/keys) page and copy the API key.  It will be a value like XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXX.
-* Paste that API key into the **API Key** field when creating the integration in Home Assistant.
+- Create an account at https://develop.purpleair.com/ (which uses Single Sign-On through a Google account).
+- On the ['keys'](https://develop.purpleair.com/keys) page press the "plus" button to create an API key.  Leave the defaults of **Read** and **Enabled**.
+- Go to the ['projects'](https://develop.purpleair.com/projects) page and select the edit (pencil) button on the listed Project.  Add points (for example 1,000,000), then select **Update**.
+- Go back to the ['keys'](https://develop.purpleair.com/keys) page and copy the API key.  It will be a value like XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXX.
+- Paste that API key into the **API Key** field when creating the integration in Home Assistant.
 
 Note that if you are using your own sensor, it will need to be set to **Public** to be visible.
 
@@ -50,11 +52,11 @@ The PurpleAir API does not provide AQI data; therefore, the integration does not
 an AQI sensor automatically. However, sensors providing raw particulate data can be used
 to create a human-friendly AQI rating sensor.
 
-<div class='note warning'>
+{% warning %}
 The guidelines within this documentation constitute estimates and are intended to help
 informed decision making. They should not replace analysis, advice or diagnosis from a
 trained medical professional.
-</div>
+{% endwarning %}
 
 ### Understanding EPA Guidelines
 
@@ -73,10 +75,10 @@ With the EPA guidelines in hand, the next step is to create
 [`statistics`](/integrations/statistics/) sensors for each particulate sensor you are
 interested. This example uses PM2.5 and PM10.0 over a 24-hour period:
 
-<div class='note info'>
+{% note %}
 The entity IDs provided below are simulated; make sure that you use entity IDs that
 actually exist in your Home Assistant instance.
-</div>
+{% endnote %}
 
 ```yaml
 sensor:
@@ -101,10 +103,10 @@ The [`statistics`](/integrations/statistics/) sensors can then be combined into 
 sensor. Note that this example takes a conservative approach: the "worse" of the two
 values (PM2.5 or PM10.0) is used to determine the overall rating.
 
-<div class='note info'>
+{% tip %}
 Reminder that the breakpoints used below can be determined from the aforementioned EPA
 guidelines.
-</div>
+{% endtip %}
 
 {% raw %}
 
