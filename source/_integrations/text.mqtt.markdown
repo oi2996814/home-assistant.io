@@ -12,13 +12,13 @@ The `mqtt` Text platform allows you to integrate devices that show text that can
 
 ## Configuration
 
-To enable MQTT text platform in your installation, add the following to your `configuration.yaml` file:
+To enable MQTT text platform in your installation, add the following to your {% term "`configuration.yaml`" %} file:
 
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  text:
-    - command_topic: command-topic
+  - text:
+      command_topic: command-topic
 ```
 
 {% configuration %}
@@ -72,11 +72,11 @@ device:
   type: map
   keys:
     configuration_url:
-      description: 'A link to the webpage that can manage the configuration of this device. Can be either an HTTP or HTTPS link.'
+      description: 'A link to the webpage that can manage the configuration of this device. Can be either an `http://`, `https://` or an internal `homeassistant://` URL.'
       required: false
       type: string
     connections:
-      description: 'A list of connections of the device to the outside world as a list of tuples `[connection_type, connection_identifier]`. For example the MAC address of a network interface: `"connections": ["mac", "02:5b:26:a8:dc:12"]`.'
+      description: 'A list of connections of the device to the outside world as a list of tuples `[connection_type, connection_identifier]`. For example the MAC address of a network interface: `"connections": [["mac", "02:5b:26:a8:dc:12"]]`.'
       required: false
       type: list
     hw_version:
@@ -95,8 +95,16 @@ device:
       description: The model of the device.
       required: false
       type: string
+    model_id:
+      description: The model identifier of the device.
+      required: false
+      type: string
     name:
       description: The name of the device.
+      required: false
+      type: string
+    serial_number:
+      description: "The serial number of the device."
       required: false
       type: string
     suggested_area:
@@ -125,7 +133,10 @@ entity_category:
   description: The [category](https://developers.home-assistant.io/docs/core/entity#generic-properties) of the entity.
   required: false
   type: string
-  default: None
+entity_picture:
+  description: "Picture URL for the entity."
+  required: false
+  type: string
 json_attributes_template:
   description: "Defines a [template](/docs/configuration/templating/#using-templates-with-the-mqtt-integration) to extract the JSON dictionary from messages received on the `json_attributes_topic`."
   required: false
@@ -150,7 +161,7 @@ mode:
   type: string
   default: text
 name:
-  description: The name of the text entity.
+  description: The name of the text entity. Can be set to `null` if only the device name is relevant.
   required: false
   type: string
   default: "MQTT Text"
@@ -162,8 +173,12 @@ pattern:
   description: A valid regular expression the text being set or received must match with.
   required: false
   type: string
+platform:
+  description: Must be `text`. Only allowed and required in [MQTT auto discovery device messages](/integrations/mqtt/#device-discovery-payload).
+  required: true
+  type: string
 qos:
-  description: The maximum QoS level of the state topic. Default is 0 and will also be used to publishing messages.
+  description: The maximum QoS level to be used when receiving and publishing messages.
   required: false
   type: integer
   default: 0
@@ -177,7 +192,7 @@ state_topic:
   required: false
   type: string
 unique_id:
-  description: An ID that uniquely identifies this Select. If two Selects have the same unique ID Home Assistant will raise an exception.
+  description: An ID that uniquely identifies this Select. If two Selects have the same unique ID Home Assistant will raise an exception. Required when used with device-based discovery.
   required: false
   type: string
 value_template:
@@ -186,11 +201,9 @@ value_template:
   type: template
 {% endconfiguration %}
 
-<div class='note warning'>
-
+{% important %}
 Make sure that your topic matches exactly. `some-topic/` and `some-topic` are different topics.
-
-</div>
+{% endimportant %}
 
 ## Examples
 
@@ -201,8 +214,8 @@ This is an example of a manual configured MQTT `text` item.
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  text:
-    - name: "Remote LCD screen"
+  - text:
+      name: "Remote LCD screen"
       icon: mdi:ab-testing
       mode: "text"
       command_topic: "txt/cmd"

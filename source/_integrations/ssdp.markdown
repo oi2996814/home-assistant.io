@@ -23,7 +23,7 @@ This integration is by default enabled, unless you've disabled or removed the [`
 ssdp:
 ```
 
-## Discovered Integrations
+## Discovered integrations
 
 The following integrations are automatically discovered by the SSDP integration:
 
@@ -33,12 +33,16 @@ The following integrations are automatically discovered by the SSDP integration:
  - [Denon AVR](/integrations/denonavr/)
  - [Denon HEOS](/integrations/heos/)
  - [DirecTV](/integrations/directv/)
+ - [Frontier Silicon](/integrations/frontier_silicon/)
  - [Huawei LTE](/integrations/huawei_lte/)
  - [Hyperion](/integrations/hyperion/)
  - [Keenetic NDMS2 Router](/integrations/keenetic_ndms2/)
  - [Konnected.io](/integrations/konnected/)
+ - [LG webOS TV](/integrations/webostv/)
  - [Logitech Harmony](/integrations/harmony/)
+ - [Lutron Caséta](/integrations/lutron_caseta/)
  - [OctoPrint](/integrations/octoprint/)
+ - [Onkyo](/integrations/onkyo/)
  - [Philips Hue](/integrations/hue/)
  - [Roku](/integrations/roku/)
  - [Samsung SyncThru Printer](/integrations/syncthru/)

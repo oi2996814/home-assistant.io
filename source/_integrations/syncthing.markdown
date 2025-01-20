@@ -6,7 +6,6 @@ ha_category:
   - Sensor
 ha_release: 2021.6
 ha_iot_class: Local Polling
-ha_quality_scale: silver
 ha_config_flow: true
 ha_codeowners:
   - '@zhulik'
@@ -24,12 +23,12 @@ The Syncthing integration allows you to monitor states of your synced folders fr
 ## Prerequisites
 
 To set up the monitoring you need to get an **API key**. Open the Syncthing web 
-interface(e.g., `http://127.0.0.1:8384`) in the browser and go to **Actions** -> **Settings**. You will find
+interface (e.g., `http://127.0.0.1:8384`) in the browser and go to **Actions** > **Settings**. You will find
 the key on the right of the settings dialog.
 
 {% include integrations/config_flow.md %}
   
-## Integration Entities
+## Integration entities
 
 The Syncthing integration adds one sensor per syncing folder:
 

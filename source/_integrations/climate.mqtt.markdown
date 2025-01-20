@@ -12,15 +12,14 @@ The `mqtt` climate platform lets you control your MQTT enabled HVAC devices.
 
 ## Configuration
 
-<a id='new_format'></a>
-
-To enable this climate platform in your installation, first add the following to your `configuration.yaml` file:
+To enable this climate platform in your installation, first add the following to your {% term "`configuration.yaml`" %} file.
+{% include integrations/restart_ha_after_config_inclusion.md %}
 
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  climate:
-    - name: Study
+  - climate:
+      name: Study
       mode_command_topic: "study/ac/mode/set"
 ```
 
@@ -31,20 +30,8 @@ action_template:
   type: template
 action_topic:
   description: >-
-    The MQTT topic to subscribe for changes of the current action. If this is set, the climate graph uses the value received as data source.
-    Valid values: `off`, `heating`, `cooling`, `drying`, `idle`, `fan`.
-  required: false
-  type: string
-aux_command_topic:
-  description: The MQTT topic to publish commands to switch auxiliary heat.
-  required: false
-  type: string
-aux_state_template:
-  description: A template to render the value received on the `aux_state_topic` with.
-  required: false
-  type: template
-aux_state_topic:
-  description: The MQTT topic to subscribe for changes of the auxiliary heat mode. If this is not set, the auxiliary heat mode works in optimistic mode (see below).
+    The MQTT topic to subscribe for changes of the current action. If this is set, the climate graph uses the value received as data source. A "None" payload resets the current action state. An empty payload is ignored.
+    Valid action values: `off`, `heating`, `cooling`, `drying`, `idle`, `fan`.
   required: false
   type: string
 availability:
@@ -105,7 +92,7 @@ device:
   type: map
   keys:
     configuration_url:
-      description: 'A link to the webpage that can manage the configuration of this device. Can be either an HTTP or HTTPS link.'
+      description: 'A link to the webpage that can manage the configuration of this device. Can be either an `http://`, `https://` or an internal `homeassistant://` URL.'
       required: false
       type: string
     connections:
@@ -128,8 +115,16 @@ device:
       description: 'The model of the device.'
       required: false
       type: string
+    model_id:
+      description: The model identifier of the device.
+      required: false
+      type: string
     name:
       description: 'The name of the device.'
+      required: false
+      type: string
+    serial_number:
+      description: "The serial number of the device."
       required: false
       type: string
     suggested_area:
@@ -158,7 +153,10 @@ entity_category:
   description: The [category](https://developers.home-assistant.io/docs/core/entity#generic-properties) of the entity.
   required: false
   type: string
-  default: None
+entity_picture:
+  description: "Picture URL for the entity."
+  required: false
+  type: string
 fan_mode_command_template:
   description: A template to render the value sent to the `fan_mode_command_topic` with.
   required: false
@@ -172,7 +170,7 @@ fan_mode_state_template:
   required: false
   type: template
 fan_mode_state_topic:
-  description: The MQTT topic to subscribe for changes of the HVAC fan mode. If this is not set, the fan mode works in optimistic mode (see below).
+  description: The MQTT topic to subscribe for changes of the HVAC fan mode. If this is not set, the fan mode works in optimistic mode (see below). A "None" payload resets the fan mode state. An empty payload is ignored.
   required: false
   type: string
 fan_modes:
@@ -183,7 +181,7 @@ fan_modes:
 initial:
   description: Set the initial target temperature. The default value depends on the temperature unit and will be 21° or 69.8°F.
   required: false
-  type: integer
+  type: float
 icon:
   description: "[Icon](/docs/configuration/customizing-devices/#icon) for the entity."
   required: false
@@ -199,7 +197,7 @@ json_attributes_topic:
 max_humidity:
   description: The minimum target humidity percentage that can be set.
   required: false
-  type: integer
+  type: float
   default: 99
 max_temp:
   description: Maximum set point available. The default value depends on the temperature unit, and will be 35°C or 95°F.
@@ -208,7 +206,7 @@ max_temp:
 min_humidity:
   description: The maximum target humidity percentage that can be set.
   required: false
-  type: integer
+  type: float
   default: 30
 min_temp:
   description: Minimum set point available. The default value depends on the temperature unit, and will be 7°C or 44.6°F.
@@ -219,7 +217,7 @@ mode_command_template:
   required: false
   type: template
 mode_command_topic:
-  description: The MQTT topic to publish commands to change the HVAC operation mode. Use `power_command_topic` if you only want to publish the power state.
+  description: The MQTT topic to publish commands to change the HVAC operation mode.
   required: false
   type: string
 mode_state_template:
@@ -227,7 +225,7 @@ mode_state_template:
   required: false
   type: template
 mode_state_topic:
-  description: The MQTT topic to subscribe for changes of the HVAC operation mode. If this is not set, the operation mode works in optimistic mode (see below).
+  description: The MQTT topic to subscribe for changes of the HVAC operation mode. If this is not set, the operation mode works in optimistic mode (see below). A "None" payload resets to an `unknown` state. An empty payload is ignored.
   required: false
   type: string
 modes:
@@ -236,7 +234,7 @@ modes:
   default: ['auto', 'off', 'cool', 'heat', 'dry', 'fan_only']
   type: list
 name:
-  description: The name of the HVAC.
+  description: The name of the HVAC. Can be set to `null` if only the device name is relevant.
   required: false
   type: string
   default: MQTT HVAC
@@ -274,7 +272,7 @@ power_command_template:
   required: false
   type: template
 power_command_topic:
-  description: The MQTT topic to publish commands to change the HVAC power state. Sends the payload configured with `payload_on` if the climate is turned on via the `climate.turn_on`, or the payload configured with `payload_off` if the climate is turned off via the `climate.turn_off` service. The climate device reports it's state back via `mode_command_topic`. Note that when this option is used in `optimistic` mode, service `climate.turn_on` will send a the message configured with `payload_on` to the device but will not update the state of the climate.
+  description: The MQTT topic to publish commands to change the HVAC power state. Sends the payload configured with `payload_on` if the climate is turned on via the `climate.turn_on`, or the payload configured with `payload_off` if the climate is turned off via the `climate.turn_off` action. Note that `optimistic` mode is not supported through `climate.turn_on` and `climate.turn_off` actions. When called, these actions will send a power command to the device but will not optimistically update the state of the climate entity. The climate device should report its state back via `mode_state_topic`.
   required: false
   type: string
 precision:
@@ -408,7 +406,7 @@ temp_step:
   required: false
   default: 1
 unique_id:
-   description: An ID that uniquely identifies this HVAC device. If two HVAC devices have the same unique ID, Home Assistant will raise an exception.
+   description: An ID that uniquely identifies this HVAC device. If two HVAC devices have the same unique ID, Home Assistant will raise an exception. Required when used with device-based discovery.
    required: false
    type: string
 value_template:
@@ -421,7 +419,7 @@ value_template:
 
 If a property works in *optimistic mode* (when the corresponding state topic is not set), Home Assistant will assume that any state changes published to the command topics did work and change the internal state of the entity immediately after publishing to the command topic. If it does not work in optimistic mode, the internal state of the entity is only updated when the requested update is confirmed by the device through the state topic. You can enforce optimistic mode by setting the `optimistic` option to `true`. When set, the internal state will always be updated, even when a state topic is defined.
 
-## Using Templates
+## Using templates
 
 For all `*_state_topic`s, a template can be specified that will be used to render the incoming payloads on these topics. Also, a default template that applies to all state topics can be specified as `value_template`. This can be useful if you received payloads are e.g., in JSON format. Since in JSON, a quoted string (e.g., `"foo"`) is just a string, this can also be used for unquoting.
 
@@ -431,8 +429,8 @@ Say you receive the operation mode `"auto"` via your `mode_state_topic`, but the
 
 ```yaml
 mqtt:
-  climate:
-    - name: Study
+  - climate:
+      name: Study
       modes:
         - "off"
         - "heat"
@@ -457,8 +455,8 @@ A full configuration example looks like the one below.
 ```yaml
 # Full example configuration.yaml entry
 mqtt:
-  climate:
-    - name: Study
+  - climate:
+      name: Study
       modes:
         - "off"
         - "cool"

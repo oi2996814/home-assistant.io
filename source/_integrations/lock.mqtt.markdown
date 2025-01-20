@@ -21,15 +21,13 @@ Optimistic mode can be forced, even if state topic is available. Try to enable i
 It's mandatory for locks to support `lock` and `unlock`. A lock may optionally support `open`, (e.g. to open the bolt in addition to the latch), in this case, `payload_open` is required in the configuration. If the lock is in optimistic mode, it will change states to `unlocked` when handling the `open` command.
 
 An MQTT lock can also report the intermediate states `unlocking`, `locking` or `jammed` if the motor reports a jammed state.
-<a id='new_format'></a>
-
-To enable MQTT locks in your installation, add the following to your `configuration.yaml` file:
+To enable MQTT locks in your installation, add the following to your {% term "`configuration.yaml`" %} file:
 
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  lock:
-    - command_topic: "home/frontdoor/set"
+  - lock:
+      command_topic: "home/frontdoor/set"
 ```
 
 {% configuration %}
@@ -70,11 +68,11 @@ availability_topic:
   required: false
   type: string
 code_format:
-  description: A regular expression to validate a supplied code when it is set during the service call to `open`, `lock` or `unlock` the MQTT lock.
+  description: A regular expression to validate a supplied code when it is set during the action to `open`, `lock` or `unlock` the MQTT lock.
   required: false
   type: string
 command_template:
-  description: Defines a [template](/docs/configuration/templating/#using-templates-with-the-mqtt-integration) to generate the payload to send to `command_topic`. The lock command template accepts the parameters `value` and `code`. The `value` parameter will contain the configured value for either `payload_open`, `payload_lock` or `payload_unlock`. The `code` parameter is set during the service call to `open`, `lock` or `unlock` the MQTT lock and will be set `None` if no code was passed.
+  description: Defines a [template](/docs/configuration/templating/#using-templates-with-the-mqtt-integration) to generate the payload to send to `command_topic`. The lock command template accepts the parameters `value` and `code`. The `value` parameter will contain the configured value for either `payload_open`, `payload_lock` or `payload_unlock`. The `code` parameter is set during the action to `open`, `lock` or `unlock` the MQTT lock and will be set `None` if no code was passed.
   required: false
   type: template
 command_topic:
@@ -87,7 +85,7 @@ device:
   type: map
   keys:
     configuration_url:
-      description: 'A link to the webpage that can manage the configuration of this device. Can be either an HTTP or HTTPS link.'
+      description: 'A link to the webpage that can manage the configuration of this device. Can be either an `http://`, `https://` or an internal `homeassistant://` URL.'
       required: false
       type: string
     connections:
@@ -110,8 +108,16 @@ device:
       description: 'The model of the device.'
       required: false
       type: string
+    model_id:
+      description: The model identifier of the device.
+      required: false
+      type: string
     name:
       description: 'The name of the device.'
+      required: false
+      type: string
+    serial_number:
+      description: "The serial number of the device."
       required: false
       type: string
     suggested_area:
@@ -140,7 +146,10 @@ entity_category:
   description: The [category](https://developers.home-assistant.io/docs/core/entity#generic-properties) of the entity.
   required: false
   type: string
-  default: None
+entity_picture:
+  description: "Picture URL for the entity."
+  required: false
+  type: string
 icon:
   description: "[Icon](/docs/configuration/customizing-devices/#icon) for the entity."
   required: false
@@ -154,7 +163,7 @@ json_attributes_topic:
   required: false
   type: string
 name:
-  description: The name of the lock.
+  description: The name of the lock. Can be set to `null` if only the device name is relevant.
   required: false
   type: string
   default: MQTT Lock
@@ -191,9 +200,17 @@ payload_open:
   description: The payload sent to the lock to open it.
   required: false
   type: string
-  default: OPEN
+payload_reset:
+  description: A special payload that resets the state to `unknown` when received on the `state_topic`.
+  required: false
+  type: string
+  default: '"None"'
+platform:
+  description: Must be `lock`. Only allowed and required in [MQTT auto discovery device messages](/integrations/mqtt/#device-discovery-payload).
+  required: true
+  type: string
 qos:
-  description: The maximum QoS level of the state topic. It will also be used for messages published to command topic.
+  description: The maximum QoS level to be used when receiving and publishing messages.
   required: false
   type: integer
   default: 0
@@ -218,7 +235,7 @@ state_locking:
   type: string
   default: LOCKING
 state_topic:
-  description: The MQTT topic subscribed to receive state updates. It accepts states configured with `state_jammed`, `state_locked`, `state_unlocked`, `state_locking` or `state_unlocking`.
+  description: The MQTT topic subscribed to receive state updates. It accepts states configured with `state_jammed`, `state_locked`, `state_unlocked`, `state_locking` or `state_unlocking`. A "None" payload resets to an `unknown` state. An empty payload is ignored.
   required: false
   type: string
 state_unlocked:
@@ -232,7 +249,7 @@ state_unlocking:
   type: string
   default: UNLOCKING
 unique_id:
-   description: An ID that uniquely identifies this lock. If two locks have the same unique ID, Home Assistant will raise an exception.
+   description: An ID that uniquely identifies this lock. If two locks have the same unique ID, Home Assistant will raise an exception. Required when used with device-based discovery.
    required: false
    type: string
 value_template:
@@ -241,11 +258,9 @@ value_template:
   type: template
 {% endconfiguration %}
 
-<div class='note warning'>
-
+{% important %}
 Make sure that your topics match exactly. `some-topic/` and `some-topic` are different topics.
-
-</div>
+{% endimportant %}
 
 ## Examples
 
@@ -260,8 +275,8 @@ The example below shows a full configuration for a MQTT lock.
 ```yaml
 # Example configuration.yaml entry
 mqtt:
-  lock:
-    - name: Frontdoor
+  - lock:
+      name: Frontdoor
       state_topic: "home-assistant/frontdoor/state"
       code_format: "^\\d{4}$"
       command_topic: "home-assistant/frontdoor/set"

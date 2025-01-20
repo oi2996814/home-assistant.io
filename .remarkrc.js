@@ -14,6 +14,9 @@ var remarkrc = {
     ["lint-no-shell-dollars"],
     ["remark-lint-heading-increment"],
     ["remark-lint-heading-style", "atx"],
+    ["remark-lint-unordered-list-marker-style", "-"],
+    ["remark-lint-ordered-list-marker-style", "."],
+    ["remark-lint-ordered-list-marker-value"],
     [
       "remark-lint-prohibited-strings",
       [
